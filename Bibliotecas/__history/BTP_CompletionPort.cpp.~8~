@@ -1,0 +1,77 @@
+//---------------------------------------------------------------------------
+
+#include "BTP_CompletionPort.h"
+#include "BTP_Excecao.h"
+
+//---------------------------------------------------------------------------
+
+__TROPICALL BTP_CompletionPort::BTP_CompletionPort(char*nome):BTP_Objeto(nome)
+{
+	// Cria Completion Port
+	handleCompletionPort = CreateIoCompletionPort(
+			INVALID_HANDLE_VALUE,
+			NULL,	// Completion port existente
+			0,		// Chave
+			0);		// Número de threads = Número de processadores
+	if(handleCompletionPort == NULL)
+	{
+		throw new BTP_Excecao("Falha ao criar I/O CompletionPort!");
+    }
+}
+//---------------------------------------------------------------------------
+__TROPICALL BTP_CompletionPort::~BTP_CompletionPort()
+{
+
+}
+//---------------------------------------------------------------------------
+void __TROPICALL BTP_CompletionPort::Objeto()
+{
+
+}
+//---------------------------------------------------------------------------
+void BTP_CompletionPort::AssociarArquivo(struct ContextKey* Porta)
+{
+		// Associa o socket da transação à completion port
+		// Vários arquivos (sockets) podem estar associados à mesma completion port
+		CreateIoCompletionPort(
+				(HANDLE)Porta->Port,
+				handleCompletionPort,
+				(DWORD)Porta,   // No key
+				0              // Use default # of threads
+			);
+
+}
+//------------------------------------------------------------------------------
+void BTP_CompletionPort::AssociarArquivo(BTP_PortaSerial* Porta)
+{
+		// Associa o socket da transação à completion port
+		// Vários arquivos (sockets) podem estar associados à mesma completion port
+		CreateIoCompletionPort(
+				(HANDLE)Porta->Port,
+				handleCompletionPort,
+				(DWORD)Porta,   // No key
+				0              // Use default # of threads
+			);
+
+}
+//--------------------------------------------------------------------------
+bool BTP_CompletionPort::AssociarThread(DWORD* NumRead,DWORD* Dado, OVERLAPPED*Over ,unsigned int TimeOut)
+{
+  return GetQueuedCompletionStatus(
+			   handleCompletionPort,
+			   NumRead,
+			   Dado,
+			   &Over,
+			   TimeOut
+			);
+
+
+			
+
+}
+//---------------------------------------------------------------------------
+HANDLE __TROPICALL BTP_CompletionPort::PegarHandle()
+{
+	return handleCompletionPort;
+}
+//---------------------------------------------------------------------------

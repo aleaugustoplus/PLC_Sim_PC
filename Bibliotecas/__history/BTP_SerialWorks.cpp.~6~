@@ -1,0 +1,40 @@
+//---------------------------------------------------------------------------
+
+
+
+
+#include "BTP_SerialWorks.h"
+#include "BTP_PortaSerial.h"
+
+//---------------------------------------------------------------------------
+SerialWorks::SerialWorks(char*nome,BTP_CompletionPort*port):BTP_Thread(nome)
+{
+ CompletionPort = port;
+}
+//---------------------------------------------------------------------------
+SerialWorks::~SerialWorks()
+{
+
+}
+//---------------------------------------------------------------------------
+void __TROPICALL SerialWorks::Executar()
+{
+  BOOL    bResult;
+  DWORD   NumRead;
+  BTP_PortaSerial *Porta;
+  OVERLAPPED *lpOver;
+
+
+ for(;;)
+ {
+   bResult = CompletionPort->AssociarThread(&NumRead,(LPDWORD)&Porta,lpOver);
+
+
+ 
+ }
+
+
+
+}
+//---------------------------------------------------------------------------
+

@@ -1,0 +1,44 @@
+//---------------------------------------------------------------------------
+
+#ifndef BTP_BufferPortaH
+#define BTP_BufferPortaH
+//---------------------------------------------------------------------------
+
+#include <windows.h>
+#include "BTP_Objeto.h"
+#include "BTP_Evento.h"
+
+
+class BTP_BufferPorta:public BTP_Objeto
+{
+
+  BTP_Evento *evSaida;
+  void __TROPICALL Objeto();
+
+  HANDLE  Porta;
+
+ public:
+
+	// Input
+  char        entrada[30];
+  OVERLAPPED  ovIn;
+	// Output
+  int         tamanhosaida;
+  char        Saida[200];
+
+  OVERLAPPED  ovsaida;
+
+  DWORD       dwWritten;
+
+  BTP_BufferPorta(char*,HANDLE porta);
+  ~BTP_BufferPorta();
+
+
+  __property HANDLE hPorta = {read=PegarhPorta};
+
+
+  HANDLE PegarhPorta();
+
+};
+
+#endif

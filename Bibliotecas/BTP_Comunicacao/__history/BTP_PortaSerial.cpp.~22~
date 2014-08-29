@@ -1,0 +1,237 @@
+/*##################################################################
+  #                Objeto de Comunicação Serial                    #
+  #               Copyright©:                                      #
+  #                Tropical® Corp.                                 #
+  #----------------------------------------------------------------#
+  #               Modificada em:                                   #
+  #               29/05/2007  - Alexandre A. S. Lopes              #
+  #----------------------------------------------------------------#
+  #               30/05/2007  - Alexandre A. S. Lopes              #
+  #----------------------------------------------------------------#
+  #               11/07/2007  - Alexandre A. S. Lopes              #
+  #----------------------------------------------------------------#
+  #               26/10/2007  - Alexandre A. S. Lopes              #
+  #----------------------------------------------------------------#
+  #               09/11/2007  - Alexandre A. S. Lopes              #
+  #----------------------------------------------------------------#
+  #               19/11/2007  - Alexandre A. S. Lopes              #
+  ##################################################################*/
+
+//---------------------------------------------------------------------------
+#include "BTP_PortaSerial.h"
+#include <string.h>
+#include <stdio.h>
+//---------------------------------------------------------------------------
+__TROPICALL BTP_PortaSerial::BTP_PortaSerial(char * nome,BTP_Porta tPorta):BTP_PortaCom(nome)
+{
+ char *cPorta;
+ switch(tPorta)
+ {
+  case COM1:
+   cPorta="COM1";
+  break;
+  case COM2:
+   cPorta="COM2";
+  break;
+  case COM3:
+   cPorta="COM3";
+  break;
+  case COM4:
+   cPorta="COM4";
+  break;
+ }
+
+ hporta = CreateFile(cPorta,
+			 GENERIC_READ | GENERIC_WRITE,
+			 0, // dispositivos comm abertos com acesso exclusivo
+			 NULL, // sem atributos de segurança
+			 OPEN_EXISTING, // deve usar OPEN_EXISTING
+			 FILE_FLAG_OVERLAPPED,      //Entrada e saída sem overlap.
+			 NULL   // hTemplate deve ser NULL para comm
+		  );
+
+  if(hporta==INVALID_HANDLE_VALUE)
+   throw new BTP_Excecao(this," Não foi possível abrir a porta de comunicação especificada! \n \
+Ela pode estar sendo usada por outro programa");
+
+  //this->ConfiguraControle();
+  //this->ConfiguraTimeOuts();
+
+   this->ZerarBuffer();
+   evSaida= new BTP_Evento("Evento Overlapped saida");
+
+   ovSaida.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+   ovSaida.hEvent = (HANDLE)((DWORD)  ovSaida.hEvent | 0x1);
+   tamanhobuffer=0;
+
+   Port=hporta;
+
+
+}
+//---------------------------------------------------------------------------
+__TROPICALL BTP_PortaSerial::~BTP_PortaSerial()
+{
+// BTP_Thread::TerminaThread();
+ delete evSaida;
+ CloseHandle(hporta);
+}
+//---------------------------------------------------------------------------
+void __TROPICALL BTP_PortaSerial::TransmitirByte(BTP_PortaCom::Dado Buffer)
+{
+ DWORD nBytesRead;
+
+ if(!WriteFile(hporta, &Buffer, 1, &nBytesRead, NULL))
+  throw new BTP_Excecao(this,"Não foi possivel escrever na porta");
+
+
+}
+//---------------------------------------------------------------------------
+void __TROPICALL BTP_PortaSerial::TransmitirDados(BTP_PortaCom::Dado *Buffer,unsigned int Tamanho)
+{
+  DWORD nBytesRead;
+ if(!WriteFile(hporta, Buffer, Tamanho, &nBytesRead, NULL))
+  throw new BTP_Excecao(this,"Não foi possivel escrever na porta");
+}
+//---------------------------------------------------------------------------
+void __TROPICALL BTP_PortaSerial::LeituraAsinc()
+{
+ int numRead;
+  ReadFile((HANDLE)hporta,  // socket
+			InBuffer,
+			(DWORD)1,
+			(LPDWORD)&numRead,
+			 &ovIn
+			);
+
+}
+//---------------------------------------------------------------------------
+BTP_PortaCom::Dado __TROPICALL BTP_PortaSerial::ReceberByte()
+{
+ DWORD nBytesRead;
+ unsigned char temp;
+
+ if(!ReadFile(hporta, &temp, 1, &nBytesRead, NULL))
+  throw new BTP_Excecao(this,"Não foi possivel ler na porta");
+
+
+ return temp;
+}
+//---------------------------------------------------------------------------
+void __TROPICALL BTP_PortaSerial::ReceberDados()
+{
+ DWORD nBytesRead;
+
+ if(!ReadFile(hporta, buffer, TAMANHO_BUFFER, &nBytesRead, NULL))
+  throw new BTP_Excecao(this,"Não foi possivel ler na porta");
+  tamanhobuffer=nBytesRead;
+}
+//---------------------------------------------------------------------------
+void __TROPICALL BTP_PortaSerial::AddEntToBuffer()
+{
+ buffer[tamanhobuffer] = bufferentrada[0];
+ tamanhobuffer++;
+}
+//---------------------------------------------------------------------------
+void __TROPICALL BTP_PortaSerial::ZerarBuffer()
+{
+for(int x=0;x<TAMANHO_BUFFER;x++)
+ buffer[x]='\0';
+
+ tamanhobuffer=0;
+}
+//---------------------------------------------------------------------------
+bool __TROPICALL BTP_PortaSerial::ConfiguraControle()
+{
+DCB dcb;
+   if(!GetCommState(hporta, &dcb))
+	 return false;
+
+   dcb.BaudRate = CBR_9600;
+   dcb.ByteSize = 8;
+   dcb.Parity = NOPARITY;
+   dcb.StopBits = ONESTOPBIT;
+
+   if( SetCommState(hporta, &dcb) == 0 )
+	  return false;
+
+   return true;
+}
+//---------------------------------------------------------------------------
+bool __TROPICALL BTP_PortaSerial::ConfiguraTimeOuts()
+{
+COMMTIMEOUTS CommTimeouts;
+
+   if( GetCommTimeouts(hporta, &CommTimeouts) == 0 )
+	  return false;
+
+
+   CommTimeouts.ReadIntervalTimeout = 2;
+   CommTimeouts.ReadTotalTimeoutMultiplier = 0;
+   CommTimeouts.ReadTotalTimeoutConstant = 2;
+   CommTimeouts.WriteTotalTimeoutMultiplier = 5;
+   CommTimeouts.WriteTotalTimeoutConstant = 5;
+
+   if( SetCommTimeouts(hporta, &CommTimeouts) == 0 )
+	  return false;
+
+   return true;
+}
+//--Propriedades-------------------------------------------------------------
+HANDLE __TROPICALL BTP_PortaSerial::PegarhPorta()
+{
+ return hporta;
+}
+//---------------------------------------------------------------------------
+BTP_PortaSerial::BTP_PortaConfig __TROPICALL BTP_PortaSerial::PegarPortaConfig()
+{
+ DCB dcb;
+ if(!GetCommState(hporta, &dcb))
+   throw new BTP_Excecao(this,"Não foi possivel obter configurações da porta!");
+
+return dcb;
+}
+//---------------------------------------------------------------------------
+void __TROPICALL BTP_PortaSerial::AlterarPortaConfig(BTP_PortaConfig tconfig)
+{
+ if(!SetCommState(hporta, &tconfig))
+  throw new BTP_Excecao(this,"Não foi possivel configurar a porta!");
+}
+//---------------------------------------------------------------------------
+HANDLE __TROPICALL BTP_PortaSerial::PegarPorta()
+{
+ return hporta;
+}
+//---------------------------------------------------------------------------
+BTP_PortaSerial::MascaraCom __TROPICALL BTP_PortaSerial::PegarMascara()
+{
+ DWORD Mask;
+ if(!GetCommMask(hporta,&Mask))
+	throw new BTP_Excecao(this,"Não foi possivel obter configuraração de máscara de comunicação!");
+ return (MascaraCom)Mask;
+}
+//---------------------------------------------------------------------------
+void __TROPICALL BTP_PortaSerial::AlterarMascara(MascaraCom Mask)
+{
+ if(!SetCommMask(hporta,Mask))
+   	throw new BTP_Excecao(this,"Não foi possivel configurar máscara de comunicação!");
+}
+//---------------------------------------------------------------------------
+BTP_PortaCom::Dado __TROPICALL BTP_PortaSerial::PegarDado()
+{
+ return bufferentrada[0];
+}
+//---------------------------------------------------------------------------
+BTP_PortaCom::Dado __TROPICALL BTP_PortaSerial::PegarBuffer(unsigned int Pos)
+{
+ if(tamanhobuffer<Pos)
+  throw new BTP_Excecao(this,"Indexador fora da faixa de limite do buffer");
+
+ return buffer[Pos];
+}
+//---------------------------------------------------------------------------
+unsigned int __TROPICALL BTP_PortaSerial::PegarTamanhoBuffer()
+{
+ return tamanhobuffer;
+}
+//---------------------------------------------------------------------------
+

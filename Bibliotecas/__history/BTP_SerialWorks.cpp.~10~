@@ -1,0 +1,78 @@
+//---------------------------------------------------------------------------
+
+
+
+
+#include "BTP_SerialWorks.h"
+#include "BTP_PortaSerial.h"
+
+//---------------------------------------------------------------------------
+SerialWorks::SerialWorks(char*nome,BTP_CompletionPort*port):BTP_Thread(nome)
+{
+ CompletionPort = port;
+}
+//---------------------------------------------------------------------------
+SerialWorks::~SerialWorks()
+{
+
+}
+//---------------------------------------------------------------------------
+void __TROPICALL SerialWorks::Executar()
+{
+  BOOL    bResult;
+  DWORD   NumRead;
+  BTP_PortaSerial *Porta;
+  OVERLAPPED *lpOver;
+
+
+ for(;;)
+ {
+   bResult = CompletionPort->AssociarThread(&NumRead,(LPDWORD)&Porta,lpOver);
+
+		if (bResult == FALSE && lpOver == NULL) {
+			//IssueRead(pCntx);
+//			FatalError(
+//				"ThreadFunc - Illegal call to GetQueuedCompletionStatus");
+		}
+		else if (bResult == FALSE && lpOver != NULL) {
+			//de;
+			//fprintf(stderr,"ThreadFunc - I/O operation failed\n");
+		}
+		else if (NumRead == 0)
+		{
+//            FlushFileBuffers(hporta);
+			Porta->LeituraAsinc();
+//			free(pCntx);
+  //			fprintf(stderr, "ThreadFunc - End of file.\n");
+			continue;
+		}
+		else
+		{
+			Porta->AddEntToBuffer();
+
+			if (Porta->Dado == 10 )
+			{
+//			 printf("Leu: %s\n",pCntx->OutBuffer);
+			 Porta->ZerarBuffer();
+			 //Sleep(200);
+			}  // if
+			// Solicita leitura do próximo caracter
+
+
+
+
+			Porta->LeituraAsinc();
+
+		}  //else
+	}  // for
+
+
+
+
+ }
+
+
+
+
+//---------------------------------------------------------------------------
+

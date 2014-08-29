@@ -1,0 +1,28 @@
+//$$---- Form HDR ----
+//---------------------------------------------------------------------------
+
+#ifndef uPrinicpalH
+#define uPrinicpalH
+//---------------------------------------------------------------------------
+#include <Classes.hpp>
+#include <Controls.hpp>
+#include <StdCtrls.hpp>
+#include <Forms.hpp>
+#include "PLC_Controle.h"
+#include <ExtCtrls.hpp>
+//---------------------------------------------------------------------------
+class TfPrincipal : public TForm
+{
+__published:	// IDE-managed Components
+	TTimer *Timer1;
+private:	// User declarations
+
+	PLC_Controle *Controle;
+public:		// User declarations
+	__fastcall TfPrincipal(TComponent* Owner);
+	__fastcall ~TfPrincipal();
+};
+//---------------------------------------------------------------------------
+extern PACKAGE TfPrincipal *fPrincipal;
+//---------------------------------------------------------------------------
+#endif

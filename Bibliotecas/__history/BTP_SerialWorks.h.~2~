@@ -1,0 +1,21 @@
+//---------------------------------------------------------------------------
+
+#ifndef BTP_SerialWorksH
+#define BTP_SerialWorksH
+
+
+#include"BTP_Thread.h"
+
+class SerialWorks:public BTP_Thread
+{
+
+ void __TROPICALL Executar();
+
+ public:
+  SerialWorks();
+  ~SerialWorks();
+
+
+};
+//---------------------------------------------------------------------------
+#endif

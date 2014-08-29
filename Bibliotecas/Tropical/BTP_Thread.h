@@ -1,0 +1,96 @@
+/*##################################################################
+  #                       Objeto Thread                            #
+  #               Copyright©:                                      #
+  #                Tropical® Corp.                                 #
+  #----------------------------------------------------------------#
+  #               Criada em:                                       #
+  #               27/06/06 - Alexandre A. S. lopes                 #
+  #               Descrição:                                       #
+  #               Classe abstrata! para criação de um objeto       #
+  #   thread que possui um método Executar que roda em uma thread. #
+  #   todo objeto dessa classe é uma thread e todas as opções já   #
+  #   estão encapsuladas em seu métodos e propriedades.            #
+  ##################################################################*/
+
+//---------------------------------------------------------------------------
+#ifndef  BTP_ThreadH
+#define  BTP_ThreadH
+ #include <Process.h>
+ #include <windows.h>
+ #include "BTP_Objeto.h"
+ #include "BTP_Excecao.h"
+
+
+ DWORD WINAPI ThreadMain(LPVOID temp);
+
+ class BIBTROPICAL BTP_Thread: public BTP_Objeto
+ {
+
+
+  bool suspensa;
+  DWORD dwthreadid;
+  HANDLE hthread;
+  void __TROPICALL Objeto();
+  HWND Janela;
+
+
+
+  protected:
+   friend   DWORD WINAPI ThreadMain(LPVOID temp);
+   virtual void  __TROPICALL Executar()=0;
+   void __TROPICALL MandarMsg(unsigned int Msg,WPARAM =0,LPARAM =0,HWND=0)
+                                                          throw(BTP_Excecao*);
+   void __TROPICALL EntregarMsg(unsigned int Msg,WPARAM =0,LPARAM =0,HWND=0)
+                                                          throw(BTP_Excecao*);
+
+
+  public:
+
+  enum PrioridadesThread {INATIVA=THREAD_PRIORITY_IDLE,
+			  MUITO_BAIXA=THREAD_PRIORITY_LOWEST,
+			  ABAIXO_DO_NORMAL=THREAD_PRIORITY_BELOW_NORMAL,
+			  NORMAL=THREAD_PRIORITY_NORMAL,
+			  ACIMA_DO_NORMAL=THREAD_PRIORITY_ABOVE_NORMAL,
+			  MAXIMA=THREAD_PRIORITY_HIGHEST,
+			  TEMPO_CRITICO=THREAD_PRIORITY_TIME_CRITICAL
+
+ };
+  enum PrioridadesProcesso {PROCESSO_TEMPO_REAL=REALTIME_PRIORITY_CLASS,
+			    PROCESSO_ALTA_PRIORIDADE=HIGH_PRIORITY_CLASS,
+			    PROCESSO_INATIVO=IDLE_PRIORITY_CLASS,
+			    PROCESSO_NORMAL=NORMAL_PRIORITY_CLASS
+  };
+
+ __TROPICALL  BTP_Thread(char *,bool ativa=false,HWND janela=0)throw(BTP_Excecao*);
+ __TROPICALL ~BTP_Thread();
+ void __TROPICALL TerminarThread();
+ void __TROPICALL ReiniciarThread()throw(BTP_Excecao*);
+
+  #ifdef BTP_CBUILDER
+   __property HANDLE Handle={read=PegarHandle};
+   __property bool Ativa={read=PegarSuspensa, write=AlterarSuspensa};
+   __property DWORD dwThreadID={read=PegarID};
+   __property int PrioridadeDaThread={read=PegarPrioridadeDaThread, write=AlterarPrioridadeDaThread};
+   __property int PrioridadeDoProcesso={read=PegarPrioridadeDoProcesso, write=AlterarPrioridadeDoProcesso};
+   __property HWND JanelaMSG={read=PegarJanelaMSG, write=AlterarJanelaMSG};
+  //~Funções das propriedades
+  private:
+  #endif
+
+
+  HANDLE __TROPICALL PegarHandle();
+  bool   __TROPICALL PegarSuspensa();
+  void   __TROPICALL AlterarSuspensa(bool);
+  DWORD  __TROPICALL PegarID();
+  int    __TROPICALL PegarPrioridadeDaThread();
+  void   __TROPICALL AlterarPrioridadeDaThread(int)throw(BTP_Excecao*);
+  int    __TROPICALL PegarPrioridadeDoProcesso();
+  void   __TROPICALL AlterarPrioridadeDoProcesso(int)throw(BTP_Excecao*);
+  HWND   __TROPICALL PegarJanelaMSG();
+  void   __TROPICALL AlterarJanelaMSG(HWND);
+
+ };
+
+//---------------------------------------------------------------------------
+
+#endif

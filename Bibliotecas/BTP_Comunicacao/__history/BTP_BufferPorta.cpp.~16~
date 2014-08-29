@@ -1,0 +1,45 @@
+//---------------------------------------------------------------------------
+
+
+#include "BTP_BufferPorta.h"
+#include <stdio.h>
+//---------------------------------------------------------------------------
+BTP_BufferPorta::BTP_BufferPorta(char*nome,HANDLE porta):BTP_Objeto(nome)
+{
+   evSaida= new BTP_Evento("Evento Overlapped saida");
+   Porta=porta;
+
+   ovsaida.hEvent = evSaida->hEvento;
+   ovsaida.hEvent = (HANDLE)((DWORD)  ovsaida.hEvent | 0x1);
+}
+//---------------------------------------------------------------------------
+BTP_BufferPorta::~BTP_BufferPorta()
+{
+ delete evSaida;
+}
+//---------------------------------------------------------------------------
+void __TROPICALL BTP_BufferPorta::Objeto()
+{
+
+}
+//---------------------------------------------------------------------------
+void BTP_BufferPorta::AddInBufferStr()
+{
+
+}
+//---------------------------------------------------------------------------
+HANDLE BTP_BufferPorta::PegarhPorta()
+{
+  return Porta;
+}
+//---------------------------------------------------------------------------
+char BTP_BufferPorta::PegarEntrada()
+{
+ return entrada[0];
+}
+//---------------------------------------------------------------------------
+char *BTP_BufferPorta::PegarBufferStr()
+{
+
+}
+//---------------------------------------------------------------------------
