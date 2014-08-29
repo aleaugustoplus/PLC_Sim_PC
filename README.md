@@ -1,5 +1,4 @@
-  Software - Gateway PLC                          
-  Copyright©:                                      
+  Software - Gateway PLC                                                             
   Noname® Corp.                                   
   Changed in:                                  
   24/06/2008 - Alexandre A. S. Lopes              
