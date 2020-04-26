@@ -1,4 +1,4 @@
-# PIC Firmware - Software Gateway PLC
+# PLC Simulator - Software Gateway PLC
 
   24/06/2008 - Alexandre A. S. Lopes              
 This software was created to attend a requirements to Real Time Programming discipline In Computer Engineering graduation FACIT - Montes Claros The Objective is simulate a PLC (Programmable logic controller) interfacing with PC This projects is composed by:  
