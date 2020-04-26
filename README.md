@@ -5,7 +5,7 @@ This software was created to attend a requirements to Real Time Programming disc
 
 * [PLC_Sim](https://github.com/aleaugustoplus/PLC_Sim_PC) to make a user interface.  
 * [Gateway](https://github.com/aleaugustoplus/Gateway) PLC to do a route between PC and PIC Board 
-* [PIC])(https://github.com/aleaugustoplus/PIC) is the software embedded in a PIC demo board.
+* [PIC](https://github.com/aleaugustoplus/PIC) is the software embedded in a PIC demo board.
 
 ## Getting Started
 
